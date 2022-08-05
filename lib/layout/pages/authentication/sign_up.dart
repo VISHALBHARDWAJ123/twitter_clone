@@ -1,6 +1,9 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:twiiter_clone/layout/widgets/custom_app_bar.dart';
+import 'package:twiiter_clone/logic_source/provider_logic/business_logic.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -15,13 +18,19 @@ class _SignUpState extends State<SignUp> {
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _dobController;
+  final FocusNode phnFocusNode = FocusNode();
   bool checkVisibility = false;
   String emailOrPhone = 'Use email instead';
-  TextInputType keyboardType = TextInputType.phone;
+
+  // TextInputType keyboardType = TextInputType.phone;
+
+  LogicalClass _logicalClass = LogicalClass();
 
   @override
   void initState() {
     super.initState();
+    _logicalClass = Provider.of<LogicalClass>(context, listen: false);
+
     _nameController = TextEditingController();
     _phoneController = TextEditingController();
     _dobController = TextEditingController();
@@ -37,9 +46,7 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery
-        .of(context)
-        .size;
+    final size = MediaQuery.of(context).size;
     return SafeArea(
       bottom: true,
       maintainBottomViewPadding: true,
@@ -113,14 +120,12 @@ class _SignUpState extends State<SignUp> {
                   padding: const EdgeInsets.only(left: 16.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      setState(() {
-                        keyboardType = (keyboardType == TextInputType.phone)
-                            ? TextInputType.emailAddress
-                            : TextInputType.phone;
-                        emailOrPhone = (emailOrPhone == "Use phone instead")
-                            ? "Use email instead"
-                            : "Use phone instead";
-                      });
+                      FocusScope.of(context).unfocus();
+
+                      _logicalClass.changeKeyboard();
+
+                      Future.delayed(const Duration(milliseconds: 10))
+                          .whenComplete(() => phnFocusNode.requestFocus());
                     },
                     style: ButtonStyle(
                       side: MaterialStateProperty.all<BorderSide>(BorderSide(
@@ -128,10 +133,10 @@ class _SignUpState extends State<SignUp> {
                       elevation: MaterialStateProperty.all<double>(0),
                       shape: MaterialStateProperty.all<OutlinedBorder>(
                           const StadiumBorder()),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          Colors.white),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.white),
                       overlayColor: MaterialStateProperty.resolveWith(
-                            (states) {
+                        (states) {
                           return states.contains(MaterialState.pressed)
                               ? Colors.grey
                               : null;
@@ -139,19 +144,20 @@ class _SignUpState extends State<SignUp> {
                       ),
                     ),
                     child: Center(
-                      child: Text(
-                        emailOrPhone,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: size.width * .04,
-                          fontWeight: FontWeight.bold,
+                      child: Consumer<LogicalClass>(
+                        builder: (context, value, _) => Text(
+                          value.buttonText,
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: size.width * .04,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              )
-          ),
+              )),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Container(
@@ -183,133 +189,142 @@ class _SignUpState extends State<SignUp> {
   }
 
   Widget _textFormFields(Size size) {
-    return Column(
-      children: [
-        SizedBox(
-          height: size.height * .12,
-          width: size.width * .8,
-          child: TextFormField(
-            controller: _nameController,
-            maxLength: 50,
-            autofocus: true,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.black,
-            ),
-            decoration: InputDecoration(
-              focusColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.blue, width: 1.0),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              fillColor: Colors.grey,
-              labelText: 'Name',
-              labelStyle: const TextStyle(
-                color: Colors.grey,
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-              ),
-              floatingLabelStyle: const TextStyle(
-                color: Colors.blueAccent,
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            onTap: () {
-              setState(() {
-                checkVisibility = false;
-              });
-            },
-          ),
-        ),
-        SizedBox(
-          height: size.height * .02,
-        ),
-        SizedBox(
-          height: size.height * .09,
-          width: size.width * .8,
-          child: TextFormField(
-            controller: _phoneController,
-            keyboardType: keyboardType,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.black,
-            ),
-            decoration: InputDecoration(
-              focusColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.blue, width: 1.0),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              fillColor: Colors.grey,
-              labelText: 'Phone number or email address',
-              labelStyle: const TextStyle(
-                color: Colors.grey,
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-              ),
-              floatingLabelStyle: const TextStyle(
-                color: Colors.blueAccent,
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
+    return
+       Column(
+          children: [
+            SizedBox(
+              height: size.height * .12,
+              width: size.width * .8,
+              child: TextFormField(
+                controller: _nameController,
+                maxLength: 50,
+                autofocus: true,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.black,
+                ),
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  focusColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.blue, width: 1.0),
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  fillColor: Colors.grey,
+                  labelText: 'Name',
+                  labelStyle: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  floatingLabelStyle: const TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    checkVisibility = false;
+                  });
+                },
               ),
             ),
-            onTap: () {
-              setState(() {
-                checkVisibility = true;
-              });
-            },
-          ),
-        ),
-        SizedBox(
-          height: size.height * .05,
-        ),
-        SizedBox(
-          height: size.height * .09,
-          width: size.width * .8,
-          child: TextFormField(
-            controller: _dobController,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.black,
+            SizedBox(
+              height: size.height * .02,
             ),
-            decoration: InputDecoration(
-              focusColor: Colors.white,
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(6.0),
-                  borderSide: BorderSide(
-                      width: 1, color: Colors.black.withOpacity(0.1))),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.blue, width: 1.0),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              fillColor: Colors.grey,
-              labelText: 'Date of birth',
-              labelStyle: const TextStyle(
-                color: Colors.grey,
-                fontSize: 18,
-                fontWeight: FontWeight.w400,
-              ),
-              floatingLabelStyle: const TextStyle(
-                color: Colors.blueAccent,
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
+            SizedBox(
+              height: size.height * .09,
+              width: size.width * .8,
+              child: Consumer<LogicalClass>(
+                builder: (context, value, _) => TextFormField(
+                  controller: _phoneController,
+                  focusNode: phnFocusNode,
+                  keyboardType: value.keyboardType,
+                  textInputAction: TextInputAction.next,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                  decoration: InputDecoration(
+                    focusColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.blue, width: 1.0),
+                      borderRadius: BorderRadius.circular(6.0),
+                    ),
+                    fillColor: Colors.grey,
+                    labelText: 'Phone number or email address',
+                    labelStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    floatingLabelStyle: const TextStyle(
+                      color: Colors.blueAccent,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      checkVisibility = true;
+                    });
+                  },
+                ),
               ),
             ),
-            onTap: () {
-              setState(() {
-                checkVisibility = false;
-              });
-            },
-          ),
-        ),
-      ],
+            SizedBox(
+              height: size.height * .05,
+            ),
+            SizedBox(
+              height: size.height * .09,
+              width: size.width * .8,
+              child: TextFormField(
+                controller: _dobController,
+                textInputAction: TextInputAction.done,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.black,
+                ),
+                decoration: InputDecoration(
+                  focusColor: Colors.white,
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(6.0),
+                      borderSide: BorderSide(
+                          width: 1, color: Colors.black.withOpacity(0.1))),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.blue, width: 1.0),
+                    borderRadius: BorderRadius.circular(6.0),
+                  ),
+                  fillColor: Colors.grey,
+                  labelText: 'Date of birth',
+                  labelStyle: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  floatingLabelStyle: const TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    checkVisibility = false;
+                  });
+                },
+              ),
+            ),
+          ],
+
+
     );
   }
 }

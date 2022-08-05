@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:twiiter_clone/layout/pages/authentication/login.dart';
+import 'package:twiiter_clone/logic_source/provider_logic/business_logic.dart';
 import 'layout/pages/authentication/sign_up.dart';
 
 void main() async {
@@ -21,13 +23,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Twitter Clone',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      // create: (BuildContext context) => LogicalClass(),
+      providers: [
+        ChangeNotifierProvider(create: (_) => LogicalClass()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Twitter Clone',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+
+        home: const MyHomePage(),
       ),
-      home: const MyHomePage(),
     );
   }
 }
