@@ -1,6 +1,5 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:twiiter_clone/layout/widgets/custom_app_bar.dart';
 import 'package:twiiter_clone/logic_source/provider_logic/business_logic.dart';
@@ -54,6 +53,7 @@ class _SignUpState extends State<SignUp> {
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
         appBar: const CustomAppBar(
+          iconVisible: true,
           icon: Icons.arrow_back_rounded,
         ),
         body: SizedBox(
@@ -124,7 +124,7 @@ class _SignUpState extends State<SignUp> {
 
                       _logicalClass.changeKeyboard();
 
-                      Future.delayed(const Duration(milliseconds: 10))
+                      Future.delayed(const Duration(milliseconds: 100))
                           .whenComplete(() => phnFocusNode.requestFocus());
                     },
                     style: ButtonStyle(
@@ -323,8 +323,6 @@ class _SignUpState extends State<SignUp> {
               ),
             ),
           ],
-
-
     );
   }
 }

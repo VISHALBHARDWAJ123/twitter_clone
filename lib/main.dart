@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:twiiter_clone/layout/pages/authentication/login.dart';
+import 'package:twiiter_clone/layout/pages/authentication/auth_method_selection.dart';
 import 'package:twiiter_clone/logic_source/provider_logic/business_logic.dart';
-import 'layout/pages/authentication/sign_up.dart';
 
 void main() async {
   runZonedGuarded(
@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      // create: (BuildContext context) => LogicalClass(),
       providers: [
         ChangeNotifierProvider(create: (_) => LogicalClass()),
       ],
@@ -34,7 +33,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-
         home: const MyHomePage(),
       ),
     );
@@ -49,6 +47,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  @override
+  void initState() {
+    Firebase.initializeApp().whenComplete(() => log('firebase initialization completed'));
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,16 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const SignUp()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const WelcomeScreen()));
                 },
-                child: const Text("Sign Up")),
-            ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const Login()));
-                },
-                child: const Text("Go to Login")),
+                child: const Text("Welcome Screen")),
           ],
         ),
       ),

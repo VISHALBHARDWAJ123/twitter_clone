@@ -36,6 +36,7 @@ class _LoginState extends State<Login> {
         resizeToAvoidBottomInset: true,
         backgroundColor: Colors.white,
         appBar: const CustomAppBar(
+          iconVisible: true,
           icon: Icons.close_rounded,
         ),
         body: SizedBox(
